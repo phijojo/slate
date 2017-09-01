@@ -2,10 +2,7 @@
 title: API Reference
 
 language_tabs: # must be one of https://git.io/vQNgJ
-  - shell
-  - ruby
-  - python
-  - javascript
+  - API
 
 toc_footers:
   - <a href='#'>Sign Up for a Developer Key</a>
@@ -19,221 +16,236 @@ search: true
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+Welcome to the IPAAS API! You can use our API to access IPAAS API endpoints, which can get information on various actions on our Platform.
 
-We have language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
-
-This example API documentation page was created with [Slate](https://github.com/tripit/slate). Feel free to edit it and use it as a base for your own API's documentation.
 
 # Authentication
 
-> To authorize, use this code:
+> To authorize
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
 ```
 
-```python
-import kittn
+Method: POST
 
-api = kittn.authorize('meowmeowmeow')
+URL : http://10.10.10.24/oauth/token
+
+Body : 
+
+grant_type:client_credentials
+client_id: <Client_id>
+client_secret: <Secret>
+
+Response:
+{
+    "access_token": "bd0ae6f6681f964397475c91e3f2790715879a2ab371433dd92eb09cbcb9382b",
+    "token_type": "bearer",
+    "expires_in": 3600,
+    "created_at": 1504124722
+}
+
 ```
 
-```shell
-# With shell, you can just pass the correct header with each request
-curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
-```
+> Make sure to replace `client_id and Secret` with your Client id and Client_secret key.
 
-```javascript
-const kittn = require('kittn');
+This will provide you Access_token. IPAAS uses Access_token to allow access to the API.
 
-let api = kittn.authorize('meowmeowmeow');
-```
+IPAAS expects for the Access_token to be included in all API requests to the server in a Body that looks like the following:
 
-> Make sure to replace `meowmeowmeow` with your API key.
-
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
+`access_token: bd0ae6f6681f964397475c91e3f2790715879a2ab371433dd92eb09cbcb9382b`
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+You must replace <code>client_id and Secret</code> with your personal client_id and Secret key.
 </aside>
 
-# Kittens
+# IPAAS
 
-## Get All Kittens
+## Get All Instance 
 
-```ruby
-require 'kittn'
+```API
+Method GET
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
+http://10.10.10.24/openstack/instances?access_token=<access_token>
 
-```python
-import kittn
 
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
-
-```shell
-curl "http://example.com/api/kittens"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
-]
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "stack_r-o7990p62": [
+            {
+                "uid": "ce90ce43-b4fc-4b64-afe8-af477380cd1f",
+                "ip": "10.0.0.237"
+            },
+            {
+                "uid": "513438d3-e5c0-454a-aabf-937baaeacab1",
+                "ip": "10.0.0.236"
+            }
+        ]
+    }
+}
 ```
 
-This endpoint retrieves all kittens.
+This endpoint retrieves all Instances.
 
 ### HTTP Request
 
-`GET http://example.com/api/kittens`
+`GET http://10.10.10.24/openstack/instances`
 
 ### Query Parameters
 
-Parameter | Default | Description
+Parameter | Required | Description
 --------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
+access_token| Yes |  This is a mandatory
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
+
+
+## Create  instances
+
+This endpoint creates Instances based on the count, flavor and images.
+
+
+```API
+Method POST
+
+http://10.10.10.24/openstack/compute
+
+
+```
+
+> The above command returns JSON structured like this:
+
+
+```json
+{"status":200,"message":"success","data":{}}
+
+```
+
+### HTTP Request
+
+`http://10.10.10.24/openstack/compute`
+
+### Query Parameters
+
+Parameter | Required | Description
+--------- | ------- | -----------
+access_token| Yes |  This is a mandatory
+user_name: | Yes | Openstack user ,This is a mandatory
+project_name |Yes | Openstack Project ,This is a mandatory
+image_id: | Yes | Image id ,This is a mandatory
+flavor_id: | Yes | Flavor id ,This is a mandatory
+instance_count| Yes |Number of instance ,This is a mandatory
+floating_ip |Yes| Floating ip requied or not,This is a mandatory
+
+
+<aside class="notice">
+This is a webhook api
 </aside>
 
-## Get a Specific Kitten
+## Delete  instances
 
-```ruby
-require 'kittn'
+This endpoint Delete Instances based on the stack.
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
 
-```python
-import kittn
+```API
+Method Delete
 
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
+http://10.10.10.24/openstack/delete_instances?access_token=bd0ae6f6681f964397475c91e3f2790715879a2ab371433dd92eb09cbcb9382b&project_name=devel&stack_name=stack_r-6tc4gha8
 
-```shell
-curl "http://example.com/api/kittens/2"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
 ```
 
 > The above command returns JSON structured like this:
 
+
 ```json
-{
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
-}
+{"status":200,"message":"success","data":{}}
+
 ```
-
-This endpoint retrieves a specific kitten.
-
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
 
 ### HTTP Request
 
-`GET http://example.com/kittens/<ID>`
+`http://10.10.10.24/openstack/delete_instances`
 
-### URL Parameters
+### Query Parameters
 
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to retrieve
+Parameter | Required | Description
+--------- | ------- | -----------
+access_token| Yes |  This is a mandatory
+stack_name: | Yes | Stack details ,This is a mandatory
+project_name |Yes | Openstack Project ,This is a mandatory
 
-## Delete a Specific Kitten
 
-```ruby
-require 'kittn'
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
-```
 
-```python
-import kittn
 
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
-```
 
-```shell
-curl "http://example.com/api/kittens/2"
-  -X DELETE
-  -H "Authorization: meowmeowmeow"
-```
+## Billing  instances
 
-```javascript
-const kittn = require('kittn');
+Get the instance status
 
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
+
+```API
+Method GET
+
+http://10.10.10.24/openstack/billing_instances?access_token=bbd0209ba1155eacf76893b3ccca5d6dfe629f86a1218b18b37c6229df860ef3&project_name=devel
+
 ```
 
 > The above command returns JSON structured like this:
 
+
 ```json
 {
-  "id": 2,
-  "deleted" : ":("
+    "status": 200,
+    "message": "success",
+    "data": {
+        "instances": [
+            {
+                "id": "ecbe45c1-c8c8-464d-b3f2-d0598a8ea3e9",
+                "name": "instance_20170901141504290348-2",
+                "state": "ACTIVE",
+                "created": "2017-09-01T18:25:49.000Z"
+            },
+            {
+                "id": "7207f06a-5c21-4fa9-bd4b-5814dc399c18",
+                "name": "instance_20170901141504290348-1",
+                "state": "ACTIVE",
+                "created": "2017-09-01T18:25:49.000Z"
+            },
+            {
+                "id": "ce90ce43-b4fc-4b64-afe8-af477380cd1f",
+                "name": "instance_20170901141504289398-2",
+                "state": "ACTIVE",
+                "created": "2017-09-01T18:09:59.000Z"
+            },
+            {
+                "id": "513438d3-e5c0-454a-aabf-937baaeacab1",
+                "name": "instance_20170901141504289398-1",
+                "state": "ACTIVE",
+                "created": "2017-09-01T18:09:59.000Z"
+            }
+        ],
+        "total": 4
+    }
 }
-```
 
-This endpoint retrieves a specific kitten.
+```
 
 ### HTTP Request
 
-`DELETE http://example.com/kittens/<ID>`
+`http://10.10.10.24/openstack/billing_instances`
 
-### URL Parameters
+### Query Parameters
 
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to delete
+Parameter | Required | Description
+--------- | ------- | -----------
+access_token| Yes |  This is a mandatory
+project_name |Yes | Openstack Project ,This is a mandatory
+
+
+
 
